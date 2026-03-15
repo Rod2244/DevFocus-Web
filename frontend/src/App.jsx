@@ -6,17 +6,20 @@ import Layout from "./components/Layout";
 import Focus from "./pages/Focus";
 import Tasks from "./pages/Tasks";
 import History from "./pages/History";
+import { TasksProvider } from "./contexts/TasksContext";
 
 export default function App() {
   return (
-    <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Focus />} />
-          <Route path="/tasks" element={<Tasks />} />
-          <Route path="/history" element={<History />} />
-        </Routes>
-      </Layout>
-    </Router>
+    <TasksProvider>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Focus />} />
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/history" element={<History />} />
+          </Routes>
+        </Layout>
+      </Router>
+    </TasksProvider>
   );
 }
