@@ -1,5 +1,5 @@
 // src/pages/Focus.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import Card from "../components/Card";
 import { useTasks } from "../contexts/TasksContext";
@@ -9,6 +9,37 @@ export default function Focus() {
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const audioContextRef = useRef(null);
+
+  // Function to play beep sound with custom audio fallback
+  const playBeep = () => {
+    // Try to play custom audio file first
+    const audio = new Audio('/Bell Ding Sound EFFECT.mp3'); // Place your audio file in the public folder
+    audio.volume = 0.5; // Adjust volume as needed
+    
+    audio.play().catch(() => {
+      // Fallback to generated beep if audio file fails
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      
+      const context = audioContextRef.current;
+      const oscillator = context.createOscillator();
+      const gainNode = context.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(context.destination);
+      
+      oscillator.frequency.setValueAtTime(800, context.currentTime); // 800Hz beep
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.3, context.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5);
+      
+      oscillator.start(context.currentTime);
+      oscillator.stop(context.currentTime + 0.5);
+    });
+  };
 
   useEffect(() => {
     let interval;
@@ -19,6 +50,7 @@ export default function Focus() {
             // Countdown mode
             if (prev <= 1) {
               setRunning(false);
+              playBeep(); // Play sound when timer reaches 0
               return 0;
             }
             return prev - 1;
